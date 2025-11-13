@@ -35,8 +35,8 @@ class App(QWidget):
         self.width = 1000
         self.height = 700
         
-        # --- Application State ---
-        self.current_summary_object = None # This will hold the full dataset object
+        # Application State
+        self.current_summary_object = None
         self.current_history_id = None
         self.history_list_data = []
         
@@ -87,20 +87,20 @@ class App(QWidget):
             }
         """)
 
-        # --- Main Layout ---
+        #Main Layout
         main_layout = QVBoxLayout(self)
         
-        # --- Top Bar: Upload Button ---
+        #Top Bar: Upload Button
         self.upload_button = QPushButton('1. Upload New CSV File')
         self.upload_button.setFont(QFont('Arial', 12, QFont.Bold))
         self.upload_button.setFixedHeight(40)
         self.upload_button.clicked.connect(self.handle_upload)
         main_layout.addWidget(self.upload_button)
 
-        # --- Content Area: 3 Columns ---
+        #Content Area: 3 Columns
         content_layout = QGridLayout()
 
-        # --- Column 0: History List ---
+        #Column 0: History List
         history_layout = QVBoxLayout()
         history_layout.addWidget(QLabel("2. Upload History (Last 5)", objectName="title"))
         self.history_widget = QListWidget()
@@ -113,7 +113,7 @@ class App(QWidget):
 
         content_layout.addLayout(history_layout, 0, 0)
 
-        # --- Column 1: Summary Stats ---
+        # Column 1: Summary Stats
         stats_frame = QFrame()
         stats_layout = QVBoxLayout(stats_frame)
         stats_layout.addWidget(QLabel("3. Data Summary", objectName="title"))
@@ -138,7 +138,7 @@ class App(QWidget):
         
         content_layout.addWidget(stats_frame, 0, 1)
 
-        # --- Column 2: Chart ---
+        # Column 2: Chart
         chart_frame = QFrame()
         chart_layout = QVBoxLayout(chart_frame)
         chart_layout.addWidget(QLabel("4. Equipment Distribution", objectName="title"))
@@ -154,17 +154,10 @@ class App(QWidget):
 
         main_layout.addLayout(content_layout)
         
-        # Set initial button states
         self.update_ui_state()
-        
-        # --- THIS IS THE CHANGE ---
-        # FROM: self.show()
-        # TO:
         self.showMaximized()
-        # --------------------------
 
     def fetch_history(self):
-        """Gets the latest history list from the API."""
         try:
             response = requests.get(f"{API_BASE_URL}/history/")
             if response.status_code == 200:
@@ -178,7 +171,6 @@ class App(QWidget):
             QMessageBox.critical(self, "Error", f"An unexpected error occurred: {e}")
 
     def update_history_widget(self):
-        """Populates the QListWidget with new history data."""
         self.history_widget.clear()
         for item_data in self.history_list_data:
             date = item_data['uploaded_at'].split('T')[0]
@@ -189,17 +181,14 @@ class App(QWidget):
             item.setSizeHint(QSize(item.sizeHint().width(), 45))
 
     def handle_history_click(self, item):
-        """Called when a user clicks an item in the history list."""
         history_id = item.data(Qt.UserRole)
         self.current_history_id = history_id
         self.load_summary(history_id)
 
     def load_summary(self, summary_id):
-        """Fetches and displays a specific summary by its ID."""
         try:
             response = requests.get(f"{API_BASE_URL}/summary/{summary_id}/")
             if response.status_code == 200:
-                # Store the full dataset object
                 self.current_summary_object = response.json()
                 self.update_ui_state()
             else:
@@ -208,7 +197,6 @@ class App(QWidget):
             QMessageBox.critical(self, "Error", "Connection Failed.")
 
     def handle_upload(self):
-        """Opens a dialog to upload a new CSV file."""
         options = QFileDialog.Options()
         file_path, _ = QFileDialog.getOpenFileName(self, "Open CSV File", "", "CSV Files (*.csv)", options=options)
 
@@ -220,10 +208,10 @@ class App(QWidget):
 
                     if response.status_code == 201:
                         data = response.json()
-                        self.current_summary_object = data # Store the full object
+                        self.current_summary_object = data
                         self.current_history_id = data.get('id')
                         self.update_ui_state()
-                        self.fetch_history() # Refresh history list
+                        self.fetch_history()
                         QMessageBox.information(self, "Success", "File uploaded!")
                     else:
                         error_msg = response.json().get('error', 'Unknown upload error')
@@ -235,7 +223,6 @@ class App(QWidget):
                 QMessageBox.critical(self, "Error", f"An unexpected error occurred: {e}")
 
     def handle_delete(self):
-        """Deletes the currently selected history item."""
         if not self.current_history_id:
             QMessageBox.warning(self, "No Item Selected", "Please select an item from the history list to delete.")
             return
@@ -259,12 +246,10 @@ class App(QWidget):
                 QMessageBox.critical(self, "Error", "Connection Failed.")
 
     def handle_pdf(self):
-        """Downloads a PDF report for the current summary."""
         if not self.current_history_id:
             QMessageBox.warning(self, "No Item Selected", "Please select an item to generate a report.")
             return
 
-        # Use the original filename for the save dialog
         filename = self.current_summary_object.get('filename', 'report')
         save_path, _ = QFileDialog.getSaveFileName(self, "Save PDF Report", f"{filename}_report.pdf", "PDF Files (*.pdf)")
 
@@ -283,9 +268,6 @@ class App(QWidget):
                 QMessageBox.critical(self, "Error", f"Could not save file: {e}")
 
     def update_ui_state(self):
-        """Updates all UI elements based on the current application state."""
-        
-        # Check for the main object AND the nested 'summary_data'
         if self.current_summary_object and 'summary_data' in self.current_summary_object:
             # Get the data from the correct nested objects
             summary_data = self.current_summary_object['summary_data']
@@ -317,7 +299,6 @@ class App(QWidget):
             self.update_chart(None) # Clear chart
 
     def update_chart(self, distribution):
-        """Redraws the Matplotlib chart."""
         self.chart_canvas.axes.clear() # Clear previous plot
         
         if distribution:

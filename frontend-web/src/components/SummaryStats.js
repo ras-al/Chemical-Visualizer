@@ -1,7 +1,7 @@
 // src/components/SummaryStats.js
 import React from 'react';
-import axios from 'axios'; // <-- ADD THIS
-import { API_BASE_URL } from '../constants'; // <-- ADD THIS
+import axios from 'axios'
+import { API_BASE_URL } from '../constants'
 
 function SummaryStats({ dataset }) {
   if (!dataset || !dataset.summary_data) { 
@@ -22,7 +22,6 @@ function SummaryStats({ dataset }) {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      // Use the original filename for the report
       link.setAttribute('download', `${dataset.filename}_report.pdf`); 
       document.body.appendChild(link);
       link.click();
@@ -38,7 +37,6 @@ function SummaryStats({ dataset }) {
   return (
     <div className="card summary-stats"> 
       <h3>2. Data Summary</h3>
-      {/* ADD FILENAME */}
       <p className="summary-filename">File: {dataset.filename}</p>
 
       <ul>
@@ -66,7 +64,6 @@ function SummaryStats({ dataset }) {
       >
         Download PDF Report
       </button>
-      {/* ------------------------- */}
     </div>
   );
 }

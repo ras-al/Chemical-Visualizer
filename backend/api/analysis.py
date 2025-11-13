@@ -2,11 +2,7 @@
 import pandas as pd
 
 def analyze_csv(csv_file):
-    """
-    Reads a CSV file from an in-memory upload and returns its summary statistics.
-    """
     try:
-        # The file is read directly from memory
         df = pd.read_csv(csv_file)
         
         # Validate required columns
@@ -24,7 +20,7 @@ def analyze_csv(csv_file):
                 'temperature_avg': round(df['Temperature'].mean(), 2),
             },
             'type_distribution': df['Type'].value_counts().to_dict(),
-            'raw_data': df.to_dict('records') # Optional: send data for charts
+            'raw_data': df.to_dict('records')
         }
         return summary, None
     except pd.errors.EmptyDataError:

@@ -8,7 +8,6 @@ import SummaryStats from './components/SummaryStats';
 import HistoryList from './components/HistoryList';
 import EquipmentChart from './components/EquipmentChart';
 
-// Import the new constants file
 import { API_BASE_URL } from './constants';
 
 function App() {
@@ -17,7 +16,7 @@ function App() {
 
   useEffect(() => {
     fetchHistory();
-  }, []); // <-- Runs ONCE on mount
+  }, []);
 
   const fetchHistory = async () => {
     try {
@@ -29,14 +28,14 @@ function App() {
   };
 
   const handleUploadSuccess = (newUploadData) => {
-    setCurrentSummary(newUploadData); // Store the whole dataset object
+    setCurrentSummary(newUploadData);
     fetchHistory();
   };
 
   const loadHistorySummary = async (historyId) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/summary/${historyId}/`);
-      setCurrentSummary(response.data); // This now receives the full dataset object
+      setCurrentSummary(response.data);
     } catch (err) {
       console.error("Error loading summary:", err);
       alert("Could not load summary for that item.");
@@ -51,7 +50,6 @@ function App() {
       await axios.delete(`${API_BASE_URL}/summary/${historyId}/`);
       fetchHistory();
       
-      // Clear the current summary if it's the one being deleted
       if (currentSummary && currentSummary.id === historyId) {
         setCurrentSummary(null);
       }
@@ -69,17 +67,12 @@ function App() {
       
       <div className="main-content">
         <FileUpload onUploadSuccess={handleUploadSuccess} />
-
-        {/* Pass the full object to SummaryStats */}
         <SummaryStats dataset={currentSummary} />
-        
         <HistoryList 
           history={historyList} 
           onHistorySelect={loadHistorySummary} 
           onHistoryDelete={handleDeleteHistory} 
         />
-        
-        {/* Update the path to the nested distribution data */}
         <EquipmentChart distribution={currentSummary?.summary_data?.type_distribution} />
       </div>
     </div>

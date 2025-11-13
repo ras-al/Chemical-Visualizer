@@ -13,15 +13,9 @@ from .serializers import DatasetHistorySerializer, DatasetDetailSerializer
 from .utils import process_csv_file
 
 class FileUploadView(APIView):
-    """
-    Handles file upload, analysis, and saving to the database.
-    Manages the "last 5" history rule.
-    """
     parser_classes = (MultiPartParser, FormParser)
-    # permission_classes = [AllowAny]  <-- REMOVE THIS LINE
-    
+
     def post(self, request, *args, **kwargs):
-        # ... (rest of function is fine) ...
         file_obj = request.FILES.get('file')
         
         if not file_obj:
@@ -56,18 +50,10 @@ class FileUploadView(APIView):
 
 
 class HistoryView(generics.ListAPIView):
-    """
-    Provides a list of the last 5 uploaded datasets.
-    """
     queryset = Dataset.objects.order_by('-uploaded_at')[:5]
     serializer_class = DatasetHistorySerializer
-    # permission_classes = [AllowAny]  <-- REMOVE THIS LINE
 
 class SummaryDetailView(APIView):
-    """
-    Retrieves (GET) or Deletes (DELETE) a single dataset by its ID.
-    """
-    # permission_classes = [AllowAny]  <-- REMOVE THIS LINE
     
     def get(self, request, pk):
         dataset = get_object_or_404(Dataset, pk=pk)
@@ -80,10 +66,6 @@ class SummaryDetailView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class ReportView(APIView):
-    """
-    Generates a PDF report for a given Dataset ID.
-    """
-    # permission_classes = [AllowAny]  <-- REMOVE THIS LINE
 
     def get(self, request, pk):
         dataset = get_object_or_404(Dataset, pk=pk)

@@ -1,7 +1,6 @@
 // src/components/HistoryList.js
 import React from 'react';
 
-// Accept the new onHistoryDelete prop
 function HistoryList({ history, onHistorySelect, onHistoryDelete }) {
   const sortedHistory = [...history].sort(
     (a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at)
@@ -22,8 +21,6 @@ function HistoryList({ history, onHistorySelect, onHistoryDelete }) {
                     <span>{item.filename}</span>
                     <small>Uploaded at: {new Date(item.uploaded_at).toLocaleString()}</small>
                 </div>
-
-                {/* Wrapper for the buttons */}
                 <div className="history-item-actions">
                   <button 
                       className="show-button"
@@ -31,8 +28,6 @@ function HistoryList({ history, onHistorySelect, onHistoryDelete }) {
                   >
                       Show
                   </button>
-                  
-                  {/* --- NEW DELETE BUTTON --- */}
                   <button 
                       className="delete-button"
                       onClick={() => onHistoryDelete(item.id)}

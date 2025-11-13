@@ -11,7 +11,6 @@ import {
   Legend,
 } from 'chart.js';
 
-// Register the components for a Bar chart
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -45,12 +44,11 @@ function EquipmentChart({ distribution }) {
   };
 
   const options = {
-    // These two options are CRITICAL for good scaling
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: false, // We don't need a legend for one dataset
+        display: false,
       },
       title: {
         display: true,
@@ -69,7 +67,6 @@ function EquipmentChart({ distribution }) {
 
   return (
     <div className="card chart-container">
-      {/* We pass the options and data to the Bar component */}
       <Bar options={options} data={data} />
     </div>
   );

@@ -2,11 +2,7 @@ import pandas as pd
 import io
 
 def process_csv_file(file_obj):
-    """
-    Processes the chemical equipment CSV file using pandas and returns a summary.
-    """
     try:
-        # Read the in-memory file
         file_data = file_obj.read().decode('utf-8-sig')
         data_io = io.StringIO(file_data)
         df = pd.read_csv(data_io)
@@ -14,7 +10,7 @@ def process_csv_file(file_obj):
     except Exception as e:
         raise ValueError(f"Error reading CSV file: {str(e)}")
 
-    # --- Perform Data Analysis ---
+    # Perform Data Analysis
     
     # 1. Check for required columns
     required_cols = {'Equipment Name', 'Type', 'Flowrate', 'Pressure', 'Temperature'}
@@ -39,5 +35,4 @@ def process_csv_file(file_obj):
     except pd.errors.EmptyDataError:
         raise ValueError("The CSV file is empty.")
     except Exception as e:
-        # Handle errors during analysis (e.g., non-numeric data)
         raise ValueError(f"Error during data analysis: {str(e)}")

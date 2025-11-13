@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-// The API endpoint from your Django backend
 const API_URL = 'http://127.0.0.1:8000/api/upload/';
 
 function FileUpload({ onUploadSuccess }) {
@@ -32,10 +31,9 @@ function FileUpload({ onUploadSuccess }) {
           'Content-Type': 'multipart/form-data',
         },
       });
-      // Pass the new data (response.data) up to the App component
       onUploadSuccess(response.data);
       setMessage('Upload successful!');
-      setSelectedFile(null); // Clear the file input
+      setSelectedFile(null); 
     } catch (err) {
       if (err.response) {
         setError(err.response.data.error || 'Upload failed.');
