@@ -1,0 +1,51 @@
+# ----------------
+# Django / Python
+# ----------------
+
+# Virtual Environment (assuming it might be in the backend folder)
+backend/venv/
+backend/env/
+backend/.venv/
+
+# Python cache
+backend/__pycache__/
+*.pyc
+
+# Local database file
+backend/db.sqlite3
+*.sqlite3
+
+# Uploaded media files
+backend/media/
+
+# IDE files
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.*
+*.env
+backend/.env
+
+# ----------------
+# React / Node.js
+# ----------------
+# (Targeting your 'frontend-web' folder)
+
+# Node modules
+frontend-web/node_modules/
+
+# Production build folder
+frontend-web/build/
+
+# Local environment files
+frontend-web/.env.local
+frontend-web/.env.development.local
+frontend-web/.env.test.local
+frontend-web/.env.production.local
+
+# Logs
+frontend-web/npm-debug.log*
+frontend-web/yarn-debug.log*
+frontend-web/yarn-error.log*
