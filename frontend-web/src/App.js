@@ -7,6 +7,7 @@ import FileUpload from './components/FileUpload';
 import SummaryStats from './components/SummaryStats';
 import HistoryList from './components/HistoryList';
 import EquipmentChart from './components/EquipmentChart';
+import DataTable from './components/DataTable'; 
 
 import { API_BASE_URL } from './constants';
 
@@ -74,6 +75,7 @@ function App() {
           onHistoryDelete={handleDeleteHistory} 
         />
         <EquipmentChart distribution={currentSummary?.summary_data?.type_distribution} />
+        <DataTable data={currentSummary?.summary_data?.raw_data} />
       </div>
     </div>
   );

@@ -5,7 +5,8 @@ import io
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QMessageBox, QLabel, QGridLayout, QListWidget,
-    QListWidgetItem, QSizePolicy, QSpacerItem, QFrame
+    QListWidgetItem, QSizePolicy, QSpacerItem, QFrame,
+    QTableWidget, QTableWidgetItem, QHeaderView
 )
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QSize
@@ -32,8 +33,8 @@ class App(QWidget):
         self.title = 'Chemical Equipment Visualizer (Desktop)'
         self.left = 100
         self.top = 100
-        self.width = 1000
-        self.height = 700
+        self.width = 1200
+        self.height = 800
         
         # Application State
         self.current_summary_object = None
@@ -74,6 +75,18 @@ class App(QWidget):
                 border: 1px solid #e0e0e0;
                 border-radius: 4px;
             }
+            QTableWidget {
+                background-color: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 4px;
+                gridline-color: #e0e0e0;
+            }
+            QHeaderView::section {
+                background-color: #f9f9f9;
+                padding: 4px;
+                border: 1px solid #e0e0e0;
+                font-weight: bold;
+            }
             QFrame {
                 background-color: white;
                 border: 1px solid #e0e0e0;
@@ -97,10 +110,10 @@ class App(QWidget):
         self.upload_button.clicked.connect(self.handle_upload)
         main_layout.addWidget(self.upload_button)
 
-        #Content Area: 3 Columns
+        #Content Area: Grid Layout
         content_layout = QGridLayout()
 
-        #Column 0: History List
+        #Row 0, Column 0: History List
         history_layout = QVBoxLayout()
         history_layout.addWidget(QLabel("2. Upload History (Last 5)", objectName="title"))
         self.history_widget = QListWidget()
@@ -113,7 +126,7 @@ class App(QWidget):
 
         content_layout.addLayout(history_layout, 0, 0)
 
-        # Column 1: Summary Stats
+        # Row 0, Column 1: Summary Stats
         stats_frame = QFrame()
         stats_layout = QVBoxLayout(stats_frame)
         stats_layout.addWidget(QLabel("3. Data Summary", objectName="title"))
@@ -138,7 +151,7 @@ class App(QWidget):
         
         content_layout.addWidget(stats_frame, 0, 1)
 
-        # Column 2: Chart
+        # Row 0, Column 2: Chart
         chart_frame = QFrame()
         chart_layout = QVBoxLayout(chart_frame)
         chart_layout.addWidget(QLabel("4. Equipment Distribution", objectName="title"))
@@ -147,10 +160,23 @@ class App(QWidget):
         
         content_layout.addWidget(chart_frame, 0, 2)
         
-        # Set column stretch factors
-        content_layout.setColumnStretch(0, 2) # History list
+        # Row 1, Columns 0-2: Data Table
+        table_frame = QFrame()
+        table_layout = QVBoxLayout(table_frame)
+        table_layout.addWidget(QLabel("5. Raw Data", objectName="title"))
+        self.table_widget = QTableWidget()
+        self.table_widget.setEditTriggers(QTableWidget.NoEditTriggers) 
+        self.table_widget.setAlternatingRowColors(True)
+        table_layout.addWidget(self.table_widget)
+        
+        content_layout.addWidget(table_frame, 1, 0, 1, 3)
+        
+        # Set column/row stretch factors
+        content_layout.setColumnStretch(0, 1) # History list
         content_layout.setColumnStretch(1, 1) # Stats
         content_layout.setColumnStretch(2, 2) # Chart
+        content_layout.setRowStretch(0, 1) # Top row (history, stats, chart)
+        content_layout.setRowStretch(1, 1) # Bottom row (table)
 
         main_layout.addLayout(content_layout)
         
@@ -284,9 +310,9 @@ class App(QWidget):
             self.label_temp.setText(f"Avg. Temperature: {avg['temperature_avg']} °C")
             
             self.update_chart(summary_data.get('type_distribution', {}))
+            self.update_table_widget(summary_data.get('raw_data', []))
         
         else:
-            # No summary loaded
             self.delete_button.setEnabled(False)
             self.pdf_button.setEnabled(False)
             
@@ -296,10 +322,11 @@ class App(QWidget):
             self.label_pressure.setText("Avg. Pressure: N/A")
             self.label_temp.setText("Avg. Temperature: N/A")
             
-            self.update_chart(None) # Clear chart
+            self.update_chart(None)
+            self.update_table_widget(None) 
 
     def update_chart(self, distribution):
-        self.chart_canvas.axes.clear() # Clear previous plot
+        self.chart_canvas.axes.clear()
         
         if distribution:
             names = list(distribution.keys())
@@ -308,7 +335,6 @@ class App(QWidget):
             self.chart_canvas.axes.bar(names, values, color='#3498db')
             self.chart_canvas.axes.set_title('Equipment Type Distribution')
             self.chart_canvas.axes.set_ylabel('# of Equipment')
-            # Rotate x-axis labels if they overlap
             self.chart_canvas.figure.autofmt_xdate()
         else:
             self.chart_canvas.axes.set_title('Equipment Type Distribution')
@@ -319,6 +345,32 @@ class App(QWidget):
                                         fontsize=12, color='gray')
 
         self.chart_canvas.draw()
+        
+    def update_table_widget(self, raw_data):
+        """Populates the QTableWidget with raw data."""
+        self.table_widget.clear()
+        
+        if not raw_data or len(raw_data) == 0:
+            self.table_widget.setRowCount(0)
+            self.table_widget.setColumnCount(0)
+            return
+
+        try:
+            headers = list(raw_data[0].keys())
+            self.table_widget.setColumnCount(len(headers))
+            self.table_widget.setHorizontalHeaderLabels(headers)
+            
+            self.table_widget.setRowCount(len(raw_data))
+            
+            for row_idx, row_data in enumerate(raw_data):
+                for col_idx, header in enumerate(headers):
+                    cell_value = str(row_data.get(header, ''))
+                    self.table_widget.setItem(row_idx, col_idx, QTableWidgetItem(cell_value))
+        
+            self.table_widget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+            
+        except Exception as e:
+            QMessageBox.critical(self, "Table Error", f"Failed to display data table: {e}")
 
 
 if __name__ == '__main__':

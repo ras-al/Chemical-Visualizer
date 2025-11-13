@@ -20,6 +20,8 @@ def process_csv_file(file_obj):
 
     # 2. Perform analysis as required by the project
     try:
+        raw_data_list = df.to_dict('records')
+
         summary_data = {
             'total_count': int(len(df)),
             'averages': {
@@ -27,7 +29,8 @@ def process_csv_file(file_obj):
                 'pressure_avg': round(df['Pressure'].mean(), 2),
                 'temperature_avg': round(df['Temperature'].mean(), 2),
             },
-            'type_distribution': df['Type'].value_counts().to_dict()
+            'type_distribution': df['Type'].value_counts().to_dict(),
+            'raw_data': raw_data_list
         }
         
         return summary_data
