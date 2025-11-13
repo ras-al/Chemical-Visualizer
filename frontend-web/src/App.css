@@ -439,3 +439,22 @@ input[type="file"]::file-selector-button:hover {
     font-size: 1.5rem;
   }
 }
+
+.summary-stats .summary-filename {
+  font-size: 0.9rem;
+  font-style: italic;
+  color: var(--color-text-light);
+  margin-top: -10px;
+  margin-bottom: 15px;
+  word-break: break-all;
+}
+
+.summary-stats .pdf-button {
+  margin-top: 1.5rem; /* Add space above the button */
+  background-color: var(--color-success); /* A green color */
+  font-weight: 600;
+}
+
+.summary-stats .pdf-button:hover {
+  background-color: #27ae60; /* A darker green */
+}

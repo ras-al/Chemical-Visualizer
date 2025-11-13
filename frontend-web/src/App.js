@@ -8,15 +8,16 @@ import SummaryStats from './components/SummaryStats';
 import HistoryList from './components/HistoryList';
 import EquipmentChart from './components/EquipmentChart';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Import the new constants file
+import { API_BASE_URL } from './constants';
 
 function App() {
-  const [currentSummary, setCurrentSummary] = useState(null);
+  const [currentSummary, setCurrentSummary] = useState(null); 
   const [historyList, setHistoryList] = useState([]);
 
   useEffect(() => {
     fetchHistory();
-  }, []);
+  }, []); // <-- Runs ONCE on mount
 
   const fetchHistory = async () => {
     try {
@@ -28,52 +29,37 @@ function App() {
   };
 
   const handleUploadSuccess = (newUploadData) => {
-    // newUploadData from the upload endpoint has the full summary
-    setCurrentSummary(newUploadData.summary_data);
-    // We just re-fetch the list to get the new item
+    setCurrentSummary(newUploadData); // Store the whole dataset object
     fetchHistory();
   };
 
   const loadHistorySummary = async (historyId) => {
     try {
-      // Call our Django endpoint
       const response = await axios.get(`${API_BASE_URL}/summary/${historyId}/`);
-      // The response.data IS the summary object
-      setCurrentSummary(response.data);
+      setCurrentSummary(response.data); // This now receives the full dataset object
     } catch (err) {
       console.error("Error loading summary:", err);
       alert("Could not load summary for that item.");
     }
   };
 
-  // --- ADD THIS NEW DELETE FUNCTION ---
-  /**
-   * Deletes a specific history item from the database
-   * and refreshes the UI.
-   */
   const handleDeleteHistory = async (historyId) => {
-    // Optional: Add a confirmation dialog
     if (!window.confirm("Are you sure you want to delete this summary? This action cannot be undone.")) {
       return;
     }
-
     try {
-      // Use the DELETE method on the same endpoint
       await axios.delete(`${API_BASE_URL}/summary/${historyId}/`);
-      
-      // Refresh the history list from the server
       fetchHistory();
       
-      // Clear the current summary view
-      // This prevents showing data that has just been deleted
-      setCurrentSummary(null); 
-
+      // Clear the current summary if it's the one being deleted
+      if (currentSummary && currentSummary.id === historyId) {
+        setCurrentSummary(null);
+      }
     } catch (err) {
       console.error("Error deleting summary:", err);
       alert("Could not delete summary.");
     }
   };
-  // -------------------------------------
 
   return (
     <div className="App">
@@ -83,16 +69,18 @@ function App() {
       
       <div className="main-content">
         <FileUpload onUploadSuccess={handleUploadSuccess} />
-        <SummaryStats summary={currentSummary} />
+
+        {/* Pass the full object to SummaryStats */}
+        <SummaryStats dataset={currentSummary} />
         
-        {/* Pass BOTH functions as props */}
         <HistoryList 
           history={historyList} 
           onHistorySelect={loadHistorySummary} 
           onHistoryDelete={handleDeleteHistory} 
         />
         
-        <EquipmentChart distribution={currentSummary?.type_distribution} />
+        {/* Update the path to the nested distribution data */}
+        <EquipmentChart distribution={currentSummary?.summary_data?.type_distribution} />
       </div>
     </div>
   );

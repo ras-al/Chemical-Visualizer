@@ -1,0 +1,44 @@
+# ----------------
+# Python
+# ----------------
+# Byte-compiled / optimized / C files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ----------------
+# Virtual Environments
+# ----------------
+# Standard venv/env names
+venv/
+env/
+.venv/
+
+# ----------------
+# IDE / Editor
+# ----------------
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# ----------------
+# Build/Packaging Artifacts
+# ----------------
+# Directories created by tools like PyInstaller or cx_Freeze
+build/
+dist/
+
+# PyInstaller spec files
+*.spec
+
+# ----------------
+# OS-specific
+# ----------------
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
