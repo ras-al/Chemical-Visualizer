@@ -16,6 +16,7 @@ Both applications connect to a common Django backend that processes uploaded CSV
 
 ## Features Implemented
 
+* **Basic Authentication**: Secure login is required on both Web and Desktop apps to access features.
 * **CSV Upload**: Both Web and Desktop UIs can upload a CSV file to the backend.
 * **Data Summary**: The backend analyzes the CSV and provides total count, averages (flowrate, pressure, temperature), and equipment type distribution.
 * **Visualization**:
@@ -27,6 +28,7 @@ Both applications connect to a common Django backend that processes uploaded CSV
 ## Setup and Run Instructions
 
 This project is divided into three parts. You must run all three simultaneously in separate terminals.
+
 ```sh
     #clone the project
     git clone https://github.com/ras-al/Chemical-Visualizer.git
@@ -58,7 +60,13 @@ The backend server must be running for the frontends to work.
     ```sh
     python manage.py migrate
     ```
-5.  Start the server (it will run on `http://127.0.0.1:8000`):
+5.  **Create a User (Required for Login):**
+    Since authentication is enabled, you must create a user account to log in from the frontends.
+    ```sh
+    python manage.py createsuperuser
+    # Follow the prompts to set a username and password
+    ```
+6.  Start the server (it will run on `http://127.0.0.1:8000`):
     ```sh
     python manage.py runserver
     ```
@@ -73,10 +81,11 @@ The backend server must be running for the frontends to work.
     ```sh
     npm install
     ```
-3.  Start the React development server (it will open in your browser at `http://localhost:3000`):
+3.  Start the React development server:
     ```sh
     npm start
     ```
+4.  Open your browser at `http://localhost:3000`. You will be prompted to log in. Use the credentials you created in the backend step.
 
 ### 3. Frontend (PyQt5 Desktop)
 
@@ -102,6 +111,7 @@ The backend server must be running for the frontends to work.
     ```sh
     python main.py
     ```
+5.  A login dialog will appear. Enter the credentials you created in the backend step to access the application.
 
 ## API Endpoints
 
