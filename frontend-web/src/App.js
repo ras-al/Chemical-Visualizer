@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css'; 
-
+import Login from './components/Login'
 import FileUpload from './components/FileUpload';
 import SummaryStats from './components/SummaryStats';
 import HistoryList from './components/HistoryList';
@@ -14,6 +14,14 @@ import { API_BASE_URL } from './constants';
 function App() {
   const [currentSummary, setCurrentSummary] = useState(null); 
   const [historyList, setHistoryList] = useState([]);
+  const [authToken, setAuthToken] = useState(null);
+
+  useEffect(() => {
+    if (authToken) {
+      axios.defaults.headers.common['Authorization'] = authToken;
+      fetchHistory();
+    }
+  }, [authToken]);
 
   useEffect(() => {
     fetchHistory();
@@ -59,6 +67,19 @@ function App() {
       alert("Could not delete summary.");
     }
   };
+
+  if (!authToken) {
+    return (
+      <div className="App">
+        <header className="App-header">
+          <h1>Chemical Equipment Parameter Visualizer</h1>
+        </header>
+        <div className="main-content" style={{ display: 'flex', justifyContent: 'center' }}>
+          <Login onLogin={setAuthToken} />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="App">

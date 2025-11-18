@@ -6,19 +6,19 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QMessageBox, QLabel, QGridLayout, QListWidget,
     QListWidgetItem, QSizePolicy, QSpacerItem, QFrame,
-    QTableWidget, QTableWidgetItem, QHeaderView
+    QTableWidget, QTableWidgetItem, QHeaderView,
+    QDialog, QLineEdit, QFormLayout, QDialogButtonBox
 )
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt, QSize
+from requests.auth import HTTPBasicAuth
 
-# Import Matplotlib
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
 API_BASE_URL = 'http://127.0.0.1:8000/api'
 
 class MplCanvas(FigureCanvas):
-    """Matplotlib canvas widget to embed in PyQt5."""
     def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
@@ -26,6 +26,28 @@ class MplCanvas(FigureCanvas):
         self.setParent(parent)
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.setStyleSheet("background-color: #FFFFFF;")
+
+class LoginDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle('Login')
+        self.setFixedSize(300, 150)
+        
+        self.username = QLineEdit(self)
+        self.password = QLineEdit(self)
+        self.password.setEchoMode(QLineEdit.Password)
+        
+        layout = QFormLayout(self)
+        layout.addRow("Username:", self.username)
+        layout.addRow("Password:", self.password)
+        
+        self.buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, self)
+        self.buttons.accepted.connect(self.accept)
+        self.buttons.rejected.connect(self.reject)
+        layout.addWidget(self.buttons)
+
+    def get_credentials(self):
+        return self.username.text(), self.password.text()
 
 class App(QWidget):
     def __init__(self):
@@ -36,13 +58,36 @@ class App(QWidget):
         self.width = 1200
         self.height = 800
         
-        # Application State
         self.current_summary_object = None
         self.current_history_id = None
         self.history_list_data = []
+        self.auth = None
+
+        if not self.check_login():
+            sys.exit(0)
         
         self.initUI()
         self.fetch_history()
+
+    def check_login(self):
+        dlg = LoginDialog(self)
+        if dlg.exec_() == QDialog.Accepted:
+            username, password = dlg.get_credentials()
+            self.auth = HTTPBasicAuth(username, password)
+            try:
+                response = requests.get(f"{API_BASE_URL}/history/", auth=self.auth)
+                if response.status_code == 200:
+                    return True
+                elif response.status_code == 401 or response.status_code == 403:
+                    QMessageBox.critical(self, "Login Failed", "Invalid username or password.")
+                else:
+                    QMessageBox.critical(self, "Login Failed", f"Server returned status: {response.status_code}")
+            except requests.exceptions.ConnectionError:
+                QMessageBox.critical(self, "Connection Error", "Is the backend server running?")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", str(e))
+        
+        return False
 
     def initUI(self):
         self.setWindowTitle(self.title)
@@ -100,20 +145,16 @@ class App(QWidget):
             }
         """)
 
-        #Main Layout
         main_layout = QVBoxLayout(self)
-        
-        #Top Bar: Upload Button
+
         self.upload_button = QPushButton('1. Upload New CSV File')
         self.upload_button.setFont(QFont('Arial', 12, QFont.Bold))
         self.upload_button.setFixedHeight(40)
         self.upload_button.clicked.connect(self.handle_upload)
         main_layout.addWidget(self.upload_button)
 
-        #Content Area: Grid Layout
         content_layout = QGridLayout()
 
-        #Row 0, Column 0: History List
         history_layout = QVBoxLayout()
         history_layout.addWidget(QLabel("2. Upload History (Last 5)", objectName="title"))
         self.history_widget = QListWidget()
@@ -126,7 +167,6 @@ class App(QWidget):
 
         content_layout.addLayout(history_layout, 0, 0)
 
-        # Row 0, Column 1: Summary Stats
         stats_frame = QFrame()
         stats_layout = QVBoxLayout(stats_frame)
         stats_layout.addWidget(QLabel("3. Data Summary", objectName="title"))
@@ -151,7 +191,6 @@ class App(QWidget):
         
         content_layout.addWidget(stats_frame, 0, 1)
 
-        # Row 0, Column 2: Chart
         chart_frame = QFrame()
         chart_layout = QVBoxLayout(chart_frame)
         chart_layout.addWidget(QLabel("4. Equipment Distribution", objectName="title"))
@@ -160,7 +199,6 @@ class App(QWidget):
         
         content_layout.addWidget(chart_frame, 0, 2)
         
-        # Row 1, Columns 0-2: Data Table
         table_frame = QFrame()
         table_layout = QVBoxLayout(table_frame)
         table_layout.addWidget(QLabel("5. Raw Data", objectName="title"))
@@ -171,12 +209,11 @@ class App(QWidget):
         
         content_layout.addWidget(table_frame, 1, 0, 1, 3)
         
-        # Set column/row stretch factors
-        content_layout.setColumnStretch(0, 1) # History list
-        content_layout.setColumnStretch(1, 1) # Stats
-        content_layout.setColumnStretch(2, 2) # Chart
-        content_layout.setRowStretch(0, 1) # Top row (history, stats, chart)
-        content_layout.setRowStretch(1, 1) # Bottom row (table)
+        content_layout.setColumnStretch(0, 1)
+        content_layout.setColumnStretch(1, 1)
+        content_layout.setColumnStretch(2, 2)
+        content_layout.setRowStretch(0, 1)
+        content_layout.setRowStretch(1, 1)
 
         main_layout.addLayout(content_layout)
         
@@ -185,7 +222,7 @@ class App(QWidget):
 
     def fetch_history(self):
         try:
-            response = requests.get(f"{API_BASE_URL}/history/")
+            response = requests.get(f"{API_BASE_URL}/history/", auth=self.auth)
             if response.status_code == 200:
                 self.history_list_data = response.json()
                 self.update_history_widget()
@@ -213,7 +250,7 @@ class App(QWidget):
 
     def load_summary(self, summary_id):
         try:
-            response = requests.get(f"{API_BASE_URL}/summary/{summary_id}/")
+            response = requests.get(f"{API_BASE_URL}/summary/{summary_id}/", auth=self.auth)
             if response.status_code == 200:
                 self.current_summary_object = response.json()
                 self.update_ui_state()
@@ -230,7 +267,7 @@ class App(QWidget):
             try:
                 with open(file_path, 'rb') as f:
                     files = {'file': (os.path.basename(file_path), f, 'text/csv')}
-                    response = requests.post(f"{API_BASE_URL}/upload/", files=files)
+                    response = requests.post(f"{API_BASE_URL}/upload/", files=files, auth=self.auth)
 
                     if response.status_code == 201:
                         data = response.json()
@@ -259,7 +296,7 @@ class App(QWidget):
 
         if reply == QMessageBox.Yes:
             try:
-                response = requests.delete(f"{API_BASE_URL}/summary/{self.current_history_id}/")
+                response = requests.delete(f"{API_BASE_URL}/summary/{self.current_history_id}/", auth=self.auth)
                 if response.status_code == 204:
                     QMessageBox.information(self, "Success", "Item deleted.")
                     self.current_summary_object = None
@@ -281,7 +318,7 @@ class App(QWidget):
 
         if save_path:
             try:
-                response = requests.get(f"{API_BASE_URL}/summary/{self.current_history_id}/report/")
+                response = requests.get(f"{API_BASE_URL}/summary/{self.current_history_id}/report/", auth=self.auth)
                 if response.status_code == 200:
                     with open(save_path, 'wb') as f:
                         f.write(response.content)
@@ -295,14 +332,12 @@ class App(QWidget):
 
     def update_ui_state(self):
         if self.current_summary_object and 'summary_data' in self.current_summary_object:
-            # Get the data from the correct nested objects
             summary_data = self.current_summary_object['summary_data']
             avg = summary_data['averages']
             
             self.delete_button.setEnabled(True)
             self.pdf_button.setEnabled(True)
             
-            # Access the data correctly
             self.label_filename.setText(f"File: {self.current_summary_object['filename']}")
             self.label_count.setText(f"Total Count: {summary_data['total_count']}")
             self.label_flow.setText(f"Avg. Flowrate: {avg['flowrate_avg']}")
@@ -323,7 +358,7 @@ class App(QWidget):
             self.label_temp.setText("Avg. Temperature: N/A")
             
             self.update_chart(None)
-            self.update_table_widget(None) 
+            self.update_table_widget(None)
 
     def update_chart(self, distribution):
         self.chart_canvas.axes.clear()
@@ -347,7 +382,6 @@ class App(QWidget):
         self.chart_canvas.draw()
         
     def update_table_widget(self, raw_data):
-        """Populates the QTableWidget with raw data."""
         self.table_widget.clear()
         
         if not raw_data or len(raw_data) == 0:

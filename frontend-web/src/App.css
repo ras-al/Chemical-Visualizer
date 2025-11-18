@@ -434,3 +434,51 @@ input[type="file"]::file-selector-button:hover {
 .summary-stats .pdf-button:hover {
   background-color: #27ae60;
 }
+
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  margin: auto; 
+  align-self: center;
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem; 
+  margin-top: 1rem;
+}
+
+input[type="text"],
+input[type="password"] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  transition: var(--transition);
+  outline: none;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.15);
+}
+
+.login-card button {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.875rem;
+  font-size: 1.1rem;
+}
+
+.login-card p {
+  text-align: center;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+  font-weight: 500;
+}
