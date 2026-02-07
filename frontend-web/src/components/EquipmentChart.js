@@ -66,7 +66,7 @@ function EquipmentChart({ distribution }) {
   };
 
   return (
-    <div className="card chart-container">
+    <div className="card equipment-chart-card">
       <Bar options={options} data={data} />
     </div>
   );

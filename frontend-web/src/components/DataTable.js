@@ -10,7 +10,7 @@ function DataTable({ data }) {
 
   return (
     <div className="card data-table-card">
-      <h3>5. Raw Data</h3>
+      <h3>Raw Data</h3>
       <div className="data-table-container">
         <table>
           <thead>

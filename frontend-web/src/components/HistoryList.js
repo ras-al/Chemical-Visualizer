@@ -1,4 +1,4 @@
-// src/components/HistoryList.js
+
 import React from 'react';
 
 function HistoryList({ history, onHistorySelect, onHistoryDelete }) {
@@ -8,37 +8,37 @@ function HistoryList({ history, onHistorySelect, onHistoryDelete }) {
 
   return (
     <div className="card history-list-card">
-      <h3>3. Upload History</h3>
+      <h3>Upload History</h3>
       {history.length === 0 ? (
         <p>No uploads yet.</p>
       ) : (
         <div className="history-list-container">
-            <ul>
+          <ul>
             {sortedHistory.map((item) => (
-                <li key={item.id}>
-                
+              <li key={item.id}>
+
                 <div className="history-item-info">
-                    <span>{item.filename}</span>
-                    <small>Uploaded at: {new Date(item.uploaded_at).toLocaleString()}</small>
+                  <span title={item.filename}>{item.filename}</span>
+                  <small>{new Date(item.uploaded_at).toLocaleDateString()} &bull; {new Date(item.uploaded_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
                 </div>
                 <div className="history-item-actions">
-                  <button 
-                      className="show-button"
-                      onClick={() => onHistorySelect(item.id)}
+                  <button
+                    className="show-button"
+                    onClick={() => onHistorySelect(item.id)}
                   >
-                      Show
+                    Show
                   </button>
-                  <button 
-                      className="delete-button"
-                      onClick={() => onHistoryDelete(item.id)}
+                  <button
+                    className="delete-button"
+                    onClick={() => onHistoryDelete(item.id)}
                   >
-                      Delete
+                    Delete
                   </button>
                 </div>
 
-                </li>
+              </li>
             ))}
-            </ul>
+          </ul>
         </div>
       )}
     </div>

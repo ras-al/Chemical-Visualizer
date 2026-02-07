@@ -1,8 +1,8 @@
-// src/components/FileUpload.js
 import React, { useState } from 'react';
+import { API_BASE_URL } from '../constants';
 import axios from 'axios';
 
-const API_URL = 'http://127.0.0.1:8000/api/upload/';
+const API_URL = `${API_BASE_URL}/upload/`;
 
 function FileUpload({ onUploadSuccess }) {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -33,7 +33,7 @@ function FileUpload({ onUploadSuccess }) {
       });
       onUploadSuccess(response.data);
       setMessage('Upload successful!');
-      setSelectedFile(null); 
+      setSelectedFile(null);
     } catch (err) {
       if (err.response) {
         setError(err.response.data.error || 'Upload failed.');
@@ -45,10 +45,36 @@ function FileUpload({ onUploadSuccess }) {
   };
 
   return (
-    <div className="card">
-      <h3>1. Upload CSV File</h3>
-      <input type="file" accept=".csv" onChange={handleFileChange} />
-      <button onClick={handleUpload}>Upload</button>
+    <div className="card file-upload-card" style={{ border: 'none', boxShadow: 'none', padding: 0, background: 'transparent' }}>
+
+      <label className="upload-container">
+        <input
+          type="file"
+          accept=".csv"
+          onChange={handleFileChange}
+          className="file-input"
+        />
+
+
+        <svg className="upload-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+
+        <span className="upload-text">
+          {selectedFile ? selectedFile.name : "Click to upload CSV"}
+        </span>
+        <span className="upload-subtext">
+          {selectedFile ? "File selected - Click 'Upload' to process" : "or drag and drop"}
+        </span>
+      </label>
+
+
+      {selectedFile && (
+        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+          <button onClick={handleUpload} style={{ width: '100%', maxWidth: '200px' }}>
+            Process File
+          </button>
+        </div>
+      )}
+
       {error && <p className="error">{error}</p>}
       {message && <p className="message">{message}</p>}
     </div>

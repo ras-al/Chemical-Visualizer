@@ -4,16 +4,16 @@ import axios from 'axios'
 import { API_BASE_URL } from '../constants'
 
 function SummaryStats({ dataset }) {
-  if (!dataset || !dataset.summary_data) { 
+  if (!dataset || !dataset.summary_data) {
     return null;
   }
 
   const { total_count, averages } = dataset.summary_data;
- 
+
   const handleDownloadPDF = async () => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/summary/${dataset.id}/report/`, 
+        `${API_BASE_URL}/summary/${dataset.id}/report/`,
         {
           responseType: 'blob',
         }
@@ -22,7 +22,7 @@ function SummaryStats({ dataset }) {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `${dataset.filename}_report.pdf`); 
+      link.setAttribute('download', `${dataset.filename}_report.pdf`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -35,8 +35,8 @@ function SummaryStats({ dataset }) {
   };
 
   return (
-    <div className="card summary-stats"> 
-      <h3>2. Data Summary</h3>
+    <div className="card summary-stats-card">
+      <h3>Data Summary</h3>
       <p className="summary-filename">File: {dataset.filename}</p>
 
       <ul>
@@ -58,8 +58,8 @@ function SummaryStats({ dataset }) {
         </li>
       </ul>
 
-      <button 
-        onClick={handleDownloadPDF} 
+      <button
+        onClick={handleDownloadPDF}
         className="pdf-button"
       >
         Download PDF Report

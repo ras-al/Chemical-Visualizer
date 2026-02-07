@@ -1,27 +1,18 @@
-// src/App.js
+
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './App.css'; 
-import Login from './components/Login'
+import './App.css';
 import FileUpload from './components/FileUpload';
 import SummaryStats from './components/SummaryStats';
 import HistoryList from './components/HistoryList';
 import EquipmentChart from './components/EquipmentChart';
-import DataTable from './components/DataTable'; 
+import DataTable from './components/DataTable';
 
 import { API_BASE_URL } from './constants';
 
 function App() {
-  const [currentSummary, setCurrentSummary] = useState(null); 
+  const [currentSummary, setCurrentSummary] = useState(null);
   const [historyList, setHistoryList] = useState([]);
-  const [authToken, setAuthToken] = useState(null);
-
-  useEffect(() => {
-    if (authToken) {
-      axios.defaults.headers.common['Authorization'] = authToken;
-      fetchHistory();
-    }
-  }, [authToken]);
 
   useEffect(() => {
     fetchHistory();
@@ -58,7 +49,7 @@ function App() {
     try {
       await axios.delete(`${API_BASE_URL}/summary/${historyId}/`);
       fetchHistory();
-      
+
       if (currentSummary && currentSummary.id === historyId) {
         setCurrentSummary(null);
       }
@@ -68,35 +59,53 @@ function App() {
     }
   };
 
-  if (!authToken) {
-    return (
-      <div className="App">
-        <header className="App-header">
-          <h1>Chemical Equipment Parameter Visualizer</h1>
-        </header>
-        <div className="main-content" style={{ display: 'flex', justifyContent: 'center' }}>
-          <Login onLogin={setAuthToken} />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="App">
       <header className="App-header">
-        <h1>Chemical Equipment Parameter Visualizer</h1>
+        <h1>Chemical Visualizer</h1>
       </header>
-      
-      <div className="main-content">
-        <FileUpload onUploadSuccess={handleUploadSuccess} />
-        <SummaryStats dataset={currentSummary} />
-        <HistoryList 
-          history={historyList} 
-          onHistorySelect={loadHistorySummary} 
-          onHistoryDelete={handleDeleteHistory} 
-        />
-        <EquipmentChart distribution={currentSummary?.summary_data?.type_distribution} />
-        <DataTable data={currentSummary?.summary_data?.raw_data} />
+
+      <div className={`main-content ${!currentSummary ? 'hero-mode' : ''}`}>
+
+        {!currentSummary && (
+          <div className="hero-section">
+            <h2>Visualize your Chemical<br />Equipment Parameters</h2>
+            <p>Upload your CSV data to generate instant insights, charts, and reports.</p>
+
+            <div className="hero-upload-wrapper">
+              <FileUpload onUploadSuccess={handleUploadSuccess} />
+            </div>
+
+            <div className="hero-history">
+              <h3>Recent Uploads</h3>
+              <HistoryList
+                history={historyList}
+                onHistorySelect={loadHistorySummary}
+                onHistoryDelete={handleDeleteHistory}
+              />
+            </div>
+          </div>
+        )}
+
+        {currentSummary && (
+          <>
+            <div style={{ gridColumn: 'span 12' }}>
+              <FileUpload onUploadSuccess={handleUploadSuccess} />
+            </div>
+
+            <SummaryStats dataset={currentSummary} />
+
+            <EquipmentChart distribution={currentSummary?.summary_data?.type_distribution} />
+
+            <HistoryList
+              history={historyList}
+              onHistorySelect={loadHistorySummary}
+              onHistoryDelete={handleDeleteHistory}
+            />
+
+            <DataTable data={currentSummary?.summary_data?.raw_data} />
+          </>
+        )}
       </div>
     </div>
   );
